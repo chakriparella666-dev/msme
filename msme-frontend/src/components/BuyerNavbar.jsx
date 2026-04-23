@@ -7,14 +7,13 @@ import { useAuth } from '../context/AuthContext'
 import { fetchStates, fetchDistricts } from '../services/locationService'
 
 export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentSearch, currentCategory }) {
-  const { user, logout } = useAuth()
+  const { user, logout, buyerLocation, setBuyerLocation } = useAuth()
   const navigate = useNavigate()
   
   const [localSearch, setLocalSearch] = useState(currentSearch || '')
   const [cart, setCart] = useState({ items: [] })
   const [isSidebarOpen, setSidebarOpen] = useState(false)
   const [categories, setCategories] = useState([])
-  const [district, setDistrict] = useState(user?.address?.city || '')
   const [showLocationModal, setShowLocationModal] = useState(false)
   const [selectedStateForLoc, setSelectedStateForLoc] = useState('')
   const [gettingLocation, setGettingLocation] = useState(false)
@@ -44,12 +43,12 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
           if (addr.state) {
             setSelectedStateForLoc(addr.state)
             if (resolvedCity) {
-              setDistrict(resolvedCity)
+              setBuyerLocation(resolvedCity)
               setShowLocationModal(false)
             }
           } else {
             if (resolvedCity) {
-              setDistrict(resolvedCity)
+              setBuyerLocation(resolvedCity)
               setShowLocationModal(false)
             }
           }
@@ -121,9 +120,8 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
   return (
     <>
       <nav className="buyer-nav" style={{ 
-        background: 'white', 
-        borderBottom: '1px solid var(--border-soft)', 
-        height: '80px', 
+        background: '#000000', 
+        height: '68px', 
         padding: '0 40px',
         display: 'flex',
         alignItems: 'center',
@@ -131,39 +129,44 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
+        boxShadow: '0 4px 30px rgba(0,0,0,0.15)',
+        color: 'white'
       }}>
         <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} 
+          style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer' }} 
           onClick={handleHomeClick}
         >
-          <div style={{ background: 'var(--text-main)', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <FaShoppingBag size={18} color="white" />
+          <div style={{ background: 'white', width: '32px', height: '32px', borderRadius: '7.2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FaShoppingBag size={14} color="#000" />
           </div>
           <span style={{ 
-            fontSize: '1.4rem', 
+            fontSize: '1.35rem', 
             fontWeight: 800, 
-            color: 'var(--text-main)', 
-            letterSpacing: '-0.8px', 
+            color: 'white', 
+            letterSpacing: '-0.5px', 
             fontFamily: "'Sora', sans-serif" 
           }}>
-            MSME<span style={{ color: 'var(--primary)', fontWeight: 400 }}>Market</span>
+            MSME<span style={{ color: '#94A3B8', fontWeight: 400 }}>Market</span>
           </span>
         </div>
 
+        {/* Search Bar Center */}
         <div className="nav-search-container" style={{ 
-          maxWidth: '500px', 
+          maxWidth: '585px', 
           flex: 1, 
-          margin: '0 40px',
-          background: '#F8FAFC',
-          borderRadius: '12px',
-          border: '1.5px solid var(--border-soft)',
-          transition: 'var(--transition)'
+          margin: '0 36px',
+          background: 'rgba(255,255,255,0.08)',
+          borderRadius: '14.4px',
+          border: '1px solid rgba(255,255,255,0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          height: '47px'
         }}>
           <input 
             type="text" 
             className="nav-search-input" 
-            placeholder="What are you looking for?"
+            placeholder="Search products or business names..."
             value={localSearch}
             onChange={(e) => {
               setLocalSearch(e.target.value)
@@ -172,73 +175,98 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
             onKeyDown={(e) => e.key === 'Enter' && handleSearchCommit()}
             style={{ 
               background: 'transparent', 
-              padding: '12px 20px', 
-              fontSize: '0.95rem',
-              color: 'var(--text-main)' 
+              padding: '10px 18px', 
+              fontSize: '1rem',
+              color: 'white',
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              fontWeight: 600
             }}
           />
           <button 
             className="nav-search-btn" 
             onClick={handleSearchCommit} 
-            style={{ background: 'transparent', color: 'var(--text-muted)' }}
+            style={{ background: 'transparent', color: '#94A3B8', padding: '0 16px', border: 'none', cursor: 'pointer' }}
           >
-            <FaSearch size={16} />
+            <FaSearch size={14} />
           </button>
         </div>
 
+        {/* Right Section Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          
+          {/* Delivery Section */}
           <div 
-            style={{ cursor: 'pointer', textAlign: 'center' }}
+            style={{ cursor: 'pointer', textAlign: 'left' }}
             onClick={() => setShowLocationModal(true)}
           >
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Delivery to</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.9rem' }}>
-              <FaMapMarkerAlt size={12} color="var(--primary)" /> {district || 'Set Location'}
+            <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '1.8px' }}>Delivery to</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5.4px', color: 'white', fontWeight: 800, fontSize: '0.95rem' }}>
+              <FaMapMarkerAlt size={12.6} color="white" /> {buyerLocation || 'Set Location'}
             </div>
           </div>
 
-          <div 
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
-            onClick={() => setSidebarOpen(true)}
-          >
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Welcome</div>
-              <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)' }}>{user?.name ? user.name.split(' ')[0] : 'Account'}</div>
+            {/* Account Section */}
+            <div 
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              onClick={() => setSidebarOpen(true)}
+            >
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.72rem', color: '#94A3B8', fontWeight: 700, letterSpacing: '0.8px' }}>ACCOUNT</div>
+                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: 'white', textTransform: 'uppercase' }}>{user?.name ? user.name.split(' ')[0] : 'GUEST'}</div>
+              </div>
+              <div style={{ width: '36px', height: '36px' }}>
+                {user?.profileImage || user?.avatar ? (
+                  <img 
+                    src={user.profileImage || user.avatar} 
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.2)' }} 
+                    alt="Profile"
+                  />
+                ) : (
+                  <FaUserCircle size={40} color="#475569" />
+                )}
+              </div>
             </div>
-            <FaUserCircle size={28} color="#CBD5E1" />
+
+          {/* Wishlist */}
+          <div onClick={() => navigate('/wishlist')} style={{ cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}>
+            <FaHeart size={18} />
           </div>
 
+          {/* Bag Button */}
           <div 
             onClick={() => navigate('/cart')} 
             style={{ 
               position: 'relative', 
               cursor: 'pointer',
-              background: 'var(--text-main)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '99px',
+              background: 'white',
+              color: '#000',
+              padding: '9px 20px',
+              borderRadius: '89px',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              transition: 'var(--transition)'
+              gap: '10.8px',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              fontWeight: 800,
+              fontSize: '1rem'
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >
-            <FaShoppingCart size={18} />
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Bag</span>
+            <FaShoppingCart size={16} />
+            Bag
             <span style={{ 
-              background: 'var(--primary)', 
+              background: '#0F172A', 
               color: 'white', 
               borderRadius: '50%', 
-              minWidth: '20px', 
+              width: '20px', 
               height: '20px', 
               fontSize: '11px', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center', 
-              fontWeight: 800,
-              boxShadow: '0 2px 8px rgba(61, 90, 254, 0.4)'
+              fontWeight: 800
             }}>
               {cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0}
             </span>
@@ -247,9 +275,9 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
       </nav>
 
       {/* Subnav */}
-      <div className="buyer-subnav" style={{ alignItems: 'center', gap: '20px' }}>
+      <div className="buyer-subnav" style={{ alignItems: 'center', gap: '20px', padding: '12px 40px' }}>
         <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', borderRight: '1px solid #eee', paddingRight: '15px', color: 'var(--primary)', fontWeight: 800 }} 
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', borderRight: '1.5px solid #eee', paddingRight: '18px', color: 'var(--primary)', fontWeight: 800, fontSize: '1.05rem' }} 
           onClick={() => setSidebarOpen(true)}
         >
           <FaBars /> All
@@ -260,14 +288,17 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
           onClick={() => handleCategorySelect('All')}
           style={{ 
             color: activeCategory === 'All' ? 'var(--primary)' : 'inherit', 
-            borderBottom: activeCategory === 'All' ? '2px solid var(--primary)' : 'none',
-            whiteSpace: 'nowrap'
+            borderBottom: activeCategory === 'All' ? '2.5px solid var(--primary)' : 'none',
+            whiteSpace: 'nowrap',
+            fontSize: '1.05rem',
+            fontWeight: 700,
+            padding: '4px 0'
           }}
         >
           All Products
         </div>
 
-        <div style={{ display: 'flex', gap: '24px', overflowX: 'auto', paddingBottom: '2px', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: '28px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }}>
           {categories.map(cat => (
             <div 
               key={cat} 
@@ -275,8 +306,11 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
               onClick={() => handleCategorySelect(cat)}
               style={{ 
                 color: activeCategory === cat ? 'var(--primary)' : 'inherit', 
-                borderBottom: activeCategory === cat ? '2px solid var(--primary)' : 'none',
-                whiteSpace: 'nowrap'
+                borderBottom: activeCategory === cat ? '2.5px solid var(--primary)' : 'none',
+                whiteSpace: 'nowrap',
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                padding: '4px 0'
               }}
             >
               {cat}
@@ -311,7 +345,7 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
           willChange: 'transform'
         }}
       >
-        <div style={{ background: 'var(--text-main)', padding: '24px 32px 20px', color: 'white', position: 'relative' }}>
+        <div style={{ background: '#000000', padding: '24px 32px 20px', color: 'white', position: 'relative' }}>
           <button 
             onClick={(e) => { e.stopPropagation(); setSidebarOpen(false); }} 
             style={{ 
@@ -332,8 +366,8 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
               <FaUserCircle size={20} />
             </div>
           </div>
-          <div style={{ fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.5, marginBottom: '2px' }}>Account</div>
-          <div style={{ fontSize: '1.1rem', fontWeight: 800, fontFamily: "'Sora', sans-serif" }}>{user?.name || 'Guest User'}</div>
+          <div style={{ fontSize: '0.66rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.5, marginBottom: '2px' }}>Account</div>
+          <div style={{ fontSize: '1.21rem', fontWeight: 800, fontFamily: "'Sora', sans-serif" }}>{user?.name || 'Guest User'}</div>
         </div>
 
         <div style={{ padding: '20px 32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -352,7 +386,7 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
                 style={{ 
                   padding: '12px 0', borderBottom: '1px solid var(--border-soft)', cursor: 'pointer', 
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                  fontWeight: 600, color: 'var(--text-main)', fontSize: '0.85rem'
+                  fontWeight: 600, color: 'var(--text-main)', fontSize: '0.935rem'
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -365,10 +399,10 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
           </div>
 
           <div style={{ marginTop: '20px', padding: '16px', borderRadius: '8px', background: '#F8FAFC', border: '1px dashed var(--border)' }}>
-            <h4 style={{ fontSize: '0.8rem', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h4 style={{ fontSize: '0.88rem', fontWeight: 800, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FaExchangeAlt size={10} color="var(--primary)" /> Merchant Mode
             </h4>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '12px' }}>Switch to manage inventory.</p>
+            <p style={{ fontSize: '0.77rem', color: 'var(--text-muted)', marginBottom: '12px' }}>Switch to manage inventory.</p>
             <button 
               onClick={() => { setSidebarOpen(false); navigate('/seller'); }} 
               style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', width: '100%' }}
@@ -380,7 +414,7 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
           <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
             <button 
               onClick={() => { logout(); setSidebarOpen(false); }}
-              style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}
+              style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '0.935rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}
             >
               <FaSignOutAlt size={14} /> Sign Out
             </button>
@@ -429,8 +463,8 @@ export default function BuyerNavbar({ onSearchChange, onCategoryChange, currentS
                   {apiDistricts.map(dist => (
                     <button 
                       key={dist}
-                      onClick={() => { setDistrict(dist); setShowLocationModal(false); }}
-                      style={{ padding: '12px', background: district === dist ? 'var(--primary)' : '#f8fafc', color: district === dist ? 'white' : 'var(--text-main)', border: district === dist ? 'none' : '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', textAlign: 'left' }}
+                      onClick={() => { setLocation(dist); setShowLocationModal(false); }}
+                      style={{ padding: '12px', background: location === dist ? 'var(--primary)' : '#f8fafc', color: location === dist ? 'white' : 'var(--text-main)', border: location === dist ? 'none' : '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', textAlign: 'left' }}
                     >
                       {dist}
                     </button>

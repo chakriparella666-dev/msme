@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import BuyerNavbar from '../../components/BuyerNavbar'
+import ScrollingBanner from '../../components/ScrollingBanner'
 
 const ProductCard = ({ p, handleAddToCart, wishlistIds = [], toggleWishlist }) => {
   const [currentImg, setCurrentImg] = useState(0)
@@ -24,119 +25,107 @@ const ProductCard = ({ p, handleAddToCart, wishlistIds = [], toggleWishlist }) =
 
   return (
     <div
-      className="glass-card"
-      onClick={() => navigate(`/product/${p._id}`)}
+      onClick={() => navigate(`/product/${p._id}`, { state: { product: p } })}
       style={{ 
-        padding: '0', 
         background: 'white', 
+        borderRadius: '32px',
         overflow: 'hidden', 
-        border: 'none', 
+        border: '1px solid var(--border-soft)', 
         display: 'flex', 
         flexDirection: 'column', 
         cursor: 'pointer', 
         position: 'relative',
-        borderRadius: 'var(--radius)'
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.03)'
       }}
+      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-8px)'}
+      onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
     >
-      <div
-        onClick={(e) => { e.stopPropagation(); toggleWishlist(p._id) }}
-        style={{ 
-          position: 'absolute', 
-          top: '16px', 
-          right: '16px', 
-          zIndex: 10, 
-          background: 'rgba(255,255,255,0.9)', 
-          borderRadius: '50%', 
-          padding: '10px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-          transition: 'var(--transition)'
-        }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        {wishlistIds.includes(p._id) ? <FaHeart color="#ef4444" size={18} /> : <FaRegHeart color="#0f172a" size={18} />}
-      </div>
-      
-      <div style={{ height: '300px', background: '#f8fafc', position: 'relative', overflow: 'hidden' }}>
+      {/* Image Container */}
+      <div style={{ position: 'relative', height: '320px', borderRadius: '28px', margin: '10px', overflow: 'hidden' }}>
         <img
-          src={p.images[currentImg] || 'https://via.placeholder.com/400?text=No+Image'}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
+          src={p.images[currentImg] || 'https://via.placeholder.com/400x500?text=No+Image'}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           alt={p.name}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/400?text=Image+Load+Error' }}
         />
-
-        {p.images.length > 1 && (
-          <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.2)', padding: '6px 10px', borderRadius: '20px', backdropFilter: 'blur(4px)' }}>
-            {p.images.map((_, i) => (
-              <div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: i === currentImg ? 'white' : 'rgba(255,255,255,0.5)', transition: 'var(--transition)' }}></div>
-            ))}
-          </div>
-        )}
-
-        {p.totalStock === 0 && (
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-            <span style={{ background: '#0f172a', color: 'white', padding: '10px 24px', borderRadius: '4px', fontWeight: 700, fontSize: '0.75rem', letterSpacing: '1.5px', textTransform: 'uppercase' }}>OUT OF STOCK</span>
-          </div>
-        )}
+        
+        {/* Wishlist Overlay */}
+        <div
+          onClick={(e) => { e.stopPropagation(); toggleWishlist(p._id) }}
+          style={{ 
+            position: 'absolute', 
+            top: '16px', 
+            right: '16px', 
+            zIndex: 10,
+            cursor: 'pointer'
+          }}
+        >
+          {wishlistIds.includes(p._id) ? <FaHeart color="#ef4444" size={20} /> : <FaRegHeart color="white" size={20} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />}
+        </div>
       </div>
 
-      <div style={{ padding: '24px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>{p.category}</div>
-        <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px', minHeight: '48px', lineHeight: 1.4, color: 'var(--text-main)' }}>{p.name}</h4>
+      {/* Content Area */}
+      <div style={{ padding: '16px 24px 24px' }}>
+        <div style={{ 
+          fontSize: '0.9rem', 
+          fontWeight: 800, 
+          color: 'var(--text-muted)', 
+          textTransform: 'uppercase', 
+          letterSpacing: '1px',
+          marginBottom: '8px'
+        }}>
+          {p.category}
+        </div>
+        
+        <h3 style={{ 
+          fontSize: '1.375rem', 
+          fontWeight: 800, 
+          marginBottom: '8px',
+          color: 'var(--text-main)'
+        }}>
+          {p.name}
+        </h3>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-          <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>₹{p.price.toLocaleString()}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <FaStar color="#FFB800" size={12} />
-            <span style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-main)' }}>{p.rating || '4.8'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+          <div style={{ background: '#F1F5F9', padding: '6px', borderRadius: '6px', display: 'flex' }}>
+            <FaShoppingBag size={10} color="var(--text-main)" />
+          </div>
+          <span style={{ fontSize: '1rem', fontWeight: 600 }}>{p.seller?.businessName || 'MSME Direct'}</span>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: '1.65rem', fontWeight: 900, color: 'var(--text-main)', fontFamily: "'Sora', sans-serif" }}>
+              ₹{p.price.toLocaleString()}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
+              <FaStar color="#FFB800" size={12} />
+              <span style={{ fontWeight: 800, fontSize: '1rem' }}>{p.rating || '4.8'}</span>
+            </div>
           </div>
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-          <FaMapMarkerAlt size={12} color="var(--secondary)" />
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{p.district || 'All India'}</span>
-          {p.isLocal && (
-            <span style={{ fontSize: '0.65rem', background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px', fontWeight: 900 }}>LOCAL</span>
-          )}
-        </div>
-
-        <div style={{ marginTop: 'auto' }}>
-          <button
-            className="btn-primary"
-            style={{ width: '100%', borderRadius: '8px' }}
-            disabled={p.totalStock === 0}
-            onClick={(e) => { e.stopPropagation(); handleAddToCart(p._id, p.sizes.find(s => s.stock > 0)?.size || 'M') }}
-          >
-            {p.totalStock === 0 ? 'Notify Me' : 'Add to Bag'}
-          </button>
-        </div>
-
       </div>
     </div>
   )
 }
 
 const ProductSkeleton = () => (
-  <div className="glass-card" style={{ padding: '0', background: 'white', overflow: 'hidden', border: 'none' }}>
-    <div className="skeleton" style={{ height: '340px', width: '100%', borderRadius: 0 }}></div>
-    <div style={{ padding: '24px', flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div className="skeleton" style={{ height: '12px', width: '30%' }}></div>
-      <div className="skeleton" style={{ height: '24px', width: '80%' }}></div>
-      <div className="skeleton" style={{ height: '18px', width: '40%' }}></div>
-      <div style={{ marginTop: '20px' }}>
-        <div className="skeleton" style={{ height: '44px', width: '100%', borderRadius: '8px' }}></div>
+  <div style={{ background: 'white', borderRadius: '32px', border: '1px solid var(--border-soft)', overflow: 'hidden' }}>
+    <div className="skeleton" style={{ height: '320px', margin: '10px', borderRadius: '28px' }}></div>
+    <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div className="skeleton" style={{ height: '14px', width: '30%' }}></div>
+      <div className="skeleton" style={{ height: '28px', width: '80%' }}></div>
+      <div className="skeleton" style={{ height: '20px', width: '40%' }}></div>
+      <div style={{ marginTop: '10px' }}>
+        <div className="skeleton" style={{ height: '48px', width: '100%', borderRadius: '12px' }}></div>
       </div>
     </div>
   </div>
 )
 
+
 export default function BuyerDashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout, location } = useAuth()
   const navigate = useNavigate()
   
   // Initialize from cache for "instant" feel
@@ -155,7 +144,7 @@ export default function BuyerDashboard() {
   useEffect(() => {
     fetchProducts()
     fetchWishlist()
-  }, [search, category])
+  }, [search, category, location]) // Refetch when location changes
 
   const requestCounter = useRef(0)
 
@@ -166,6 +155,7 @@ export default function BuyerDashboard() {
       const params = new URLSearchParams()
       if (search) params.append('search', search)
       if (category && category !== 'All') params.append('category', category)
+      if (location) params.append('district', location)
       
       const { data } = await axios.get(`/api/products?${params.toString()}`)
 
@@ -175,8 +165,12 @@ export default function BuyerDashboard() {
         setProducts(fetchedProducts)
         setLoading(false)
         
-        if (!search && category === 'All' && fetchedProducts.length > 0) {
-          localStorage.setItem('cached_buyer_products', JSON.stringify(fetchedProducts))
+        if (!search && category === 'All') {
+          if (fetchedProducts.length > 0) {
+            localStorage.setItem('cached_buyer_products', JSON.stringify(fetchedProducts))
+          } else {
+            localStorage.removeItem('cached_buyer_products')
+          }
         }
       }
     } catch (err) { 
@@ -225,13 +219,18 @@ export default function BuyerDashboard() {
 
       {/* Main Content Area */}
       <main style={{ maxWidth: '1400px', margin: '40px auto', padding: '0 20px' }}>
+        
+        <ScrollingBanner products={products} />
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
           <div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)' }}>
+            <h2 style={{ fontSize: '1.925rem', fontWeight: 800, color: 'var(--text-main)' }}>
               {category === 'All' ? (search ? `Results for "${search}"` : 'Our Best Collection') : `Latest in ${category}`}
             </h2>
             {(!loading || products.length > 0) && (
-              <p style={{ color: 'var(--text-muted)' }}>Found {products.length} products curated for you.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                Found {products.length} products {location ? `in ${location}` : 'curated for you'}.
+              </p>
             )}
           </div>
 
@@ -243,9 +242,9 @@ export default function BuyerDashboard() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <ProductSkeleton key={i} />)}
           </div>
         ) : products.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px', background: 'white', borderRadius: '20px', border: '2px dashed var(--border)' }}>
-            <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)' }}>No matches found in {category}.</p>
-            <button className="btn-outline" style={{ marginTop: '20px' }} onClick={() => { setCategory('All'); setSearch(''); }}>Back to Home</button>
+          <div style={{ textAlign: 'center', padding: '80px', background: 'white', borderRadius: '32px', border: '1px solid var(--border-soft)' }}>
+            <p style={{ fontSize: '1.375rem', color: 'var(--text-muted)', fontWeight: 600 }}>No matches found in {category}.</p>
+            <button className="btn-outline" style={{ marginTop: '24px' }} onClick={() => { setCategory('All'); setSearch(''); }}>Back to Home</button>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '32px' }}>

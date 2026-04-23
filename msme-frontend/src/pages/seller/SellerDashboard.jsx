@@ -1488,59 +1488,45 @@ function ProductForm({ newProduct, setNewProduct, isEditing, onSubmit, onClose }
             </div>
           </div>
 
-          <div style={{ marginBottom: '32px', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid var(--border)', marginTop: '20px' }}>
-            <label className="input-label">Stock by {sizeConfig.label}</label>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
-              {newProduct.sizes.map((s, idx) => (
-                <div key={s.size} style={{ textAlign: 'center', minWidth: '60px' }}>
-                  <div style={{ fontSize: '0.7rem', marginBottom: '6px', fontWeight: 800, color: 'var(--primary)', whiteSpace: 'nowrap' }}>{s.size}</div>
-                  <input type="number" min="0" className="input-field" style={{ padding: '8px', textAlign: 'center', width: '60px' }} value={s.stock}
-                    onChange={e => {
-                      const updatedSizes = [...newProduct.sizes]
-                      updatedSizes[idx] = { ...updatedSizes[idx], stock: parseInt(e.target.value) || 0 }
-                      setNewProduct({ ...newProduct, sizes: updatedSizes })
-                    }} />
-                </div>
-              ))}
+          <h3 style={{ marginTop: '32px', marginBottom: '16px', fontSize: '1rem', fontWeight: 800 }}>Inventory & Sizes ({sizeConfig.label})</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            {newProduct.sizes.map((s, idx) => (
+              <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1.5px solid var(--border-soft)' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', marginBottom: '4px' }}>{s.size}</div>
+                <input type="number" className="input-field" style={{ padding: '8px', fontSize: '0.9rem' }} value={s.stock} onChange={e => {
+                  const updated = [...newProduct.sizes];
+                  updated[idx] = { ...s, stock: parseInt(e.target.value) || 0 };
+                  setNewProduct({ ...newProduct, sizes: updated })
+                }} />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Raw Materials (AI Production Advisory)</h3>
+              <button type="button" onClick={addRawMaterial} className="btn-outline" style={{ fontSize: '0.75rem', padding: '6px 12px' }}><FaPlus /> Add Material</button>
             </div>
+            {newProduct.rawMaterials.map((rm, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+                <input type="text" className="input-field" placeholder="Material Name" value={rm.name} onChange={e => updateRawMaterial(idx, 'name', e.target.value)} />
+                <input type="number" className="input-field" placeholder="Qty/Unit" value={rm.quantityPerUnit} onChange={e => updateRawMaterial(idx, 'quantityPerUnit', e.target.value)} />
+                <button type="button" onClick={() => removeRawMaterial(idx)} style={{ background: '#fee2e2', border: 'none', color: '#ef4444', borderRadius: '8px', padding: '0 12px' }}><FaTrashAlt /></button>
+              </div>
+            ))}
           </div>
 
-          {/* Raw Materials Tracker */}
-          <div style={{ marginBottom: '32px', padding: '24px', border: '1px solid var(--secondary)', borderRadius: '16px', background: 'rgba(197, 160, 89, 0.05)' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-               <label className="input-label" style={{ margin: 0 }}>Raw Materials Tracker</label>
-               <button type="button" onClick={addRawMaterial} className="btn-outline" style={{ fontSize: '0.75rem', padding: '6px 12px' }}>+ Add Material</button>
-             </div>
-             {newProduct.rawMaterials.length === 0 ? (
-               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center' }}>No raw materials tracked for this product.</p>
-             ) : (
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                 {newProduct.rawMaterials.map((rm, idx) => (
-                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 40px', gap: '12px', alignItems: 'center' }}>
-                     <input type="text" className="input-field" placeholder="Material Name" value={rm.name} onChange={e => updateRawMaterial(idx, 'name', e.target.value)} />
-                     <input type="number" className="input-field" placeholder="Qty / Unit" value={rm.quantityPerUnit} onChange={e => updateRawMaterial(idx, 'quantityPerUnit', e.target.value)} />
-                     <input type="number" className="input-field" placeholder="In Stock" value={rm.stock} onChange={e => updateRawMaterial(idx, 'stock', e.target.value)} />
-                     <button type="button" onClick={() => removeRawMaterial(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}><FaTrashAlt /></button>
-                   </div>
-                 ))}
-               </div>
-             )}
-          </div>
-
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn-outline" onClick={onClose} style={{ padding: '12px 32px' }}>Cancel</button>
-            <button type="submit" className="btn-primary" style={{ padding: '12px 40px' }}>{isEditing ? 'Save Changes' : 'Create Listing'}</button>
-          </div>
+          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '18px', borderRadius: '12px', marginTop: '20px' }}>
+            {isEditing ? 'Update Product' : 'Publish Product'}
+          </button>
         </form>
       </div>
     </div>
   )
 }
 
-
-// ── Main Dashboard Component ─────────────────────────────────────────────────
 export default function SellerDashboard() {
-  const { user, setUser, logout } = useAuth()
+  const { user, setUser, logout, sellerLocation, setSellerLocation } = useAuth()
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('seller_active_tab') || 'overview'
   })
@@ -1570,7 +1556,7 @@ export default function SellerDashboard() {
       return cached ? JSON.parse(cached) : { totalSales: 0, activeOrders: 0 }
     } catch { return { totalSales: 0, activeOrders: 0 } }
   })
-
+  
   const [forecast, setForecast] = useState(() => {
     try {
       const cached = localStorage.getItem('cached_seller_forecast')
@@ -1585,15 +1571,15 @@ export default function SellerDashboard() {
   const [editId, setEditId] = useState(null)
   const [editProfile, setEditProfile] = useState(false)
   const [newBusinessName, setNewBusinessName] = useState(user?.businessName || '')
-  const [newDistrict, setNewDistrict] = useState(user?.district || '')
+  const [newDistrict, setNewDistrict] = useState(sellerLocation || user?.district || '')
   const [newState, setNewState] = useState(user?.state || '')
 
   // Sync profile fields whenever user object updates (e.g. after save)
   useEffect(() => {
     setNewBusinessName(user?.businessName || '')
     setNewState(user?.state || '')
-    setNewDistrict(user?.district || '')
-  }, [user])
+    setNewDistrict(sellerLocation || user?.district || '')
+  }, [user, sellerLocation])
 
   const blankProduct = {
     name: '', description: '', price: '', category: '', images: [''],
@@ -1722,9 +1708,11 @@ export default function SellerDashboard() {
         district: newDistrict,
         state: newState
       })
-      setUser(data.user); setEditProfile(false); alert('Profile updated!')
+      setUser(data.user); 
+      setSellerLocation(newDistrict); // Sync global Seller location
+      setEditProfile(false); 
+      alert('Profile updated!')
       
-      // Update local storage if needed to reflect profile completion
       fetchProducts(); fetchOrders(); fetchStats();
     } catch (err) { alert(err.response?.data?.message || 'Update failed') }
   }

@@ -15,10 +15,8 @@ function AuthProvider({ children }) {
         setUser(data.user);
         setLoading(false);
       } catch (err) {
-        // If DB is busy (503) or connection flicker, retry up to 5 times
         if (err.response?.status === 503 && retries < 5) {
           setRetries(prev => prev + 1);
-          console.log(`📡 Database busy. Retrying auth...`);
           setTimeout(fetchUser, 2000);
         } else {
           setUser(null);
@@ -29,6 +27,37 @@ function AuthProvider({ children }) {
     fetchUser();
   }, [])
 
+  const [buyerLocation, setBuyerLocationState] = useState(() => {
+    return localStorage.getItem('buyer_location') || ''
+  })
+
+  const [sellerLocation, setSellerLocationState] = useState(() => {
+    return localStorage.getItem('seller_location') || ''
+  })
+
+  useEffect(() => {
+    if (user?.district) {
+      if (!localStorage.getItem('buyer_location')) {
+        setBuyerLocationState(user.district)
+        localStorage.setItem('buyer_location', user.district)
+      }
+      if (!localStorage.getItem('seller_location')) {
+        setSellerLocationState(user.district)
+        localStorage.setItem('seller_location', user.district)
+      }
+    }
+  }, [user])
+
+  const setBuyerLocation = (newLoc) => {
+    setBuyerLocationState(newLoc)
+    localStorage.setItem('buyer_location', newLoc)
+  }
+
+  const setSellerLocation = (newLoc) => {
+    setSellerLocationState(newLoc)
+    localStorage.setItem('seller_location', newLoc)
+  }
+
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
@@ -36,7 +65,11 @@ function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout }}>
+    <AuthContext.Provider value={{ 
+      user, setUser, loading, logout, 
+      buyerLocation, setBuyerLocation,
+      sellerLocation, setSellerLocation 
+    }}>
       {loading ? (
         <div style={{
           height: '100vh',

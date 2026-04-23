@@ -65,7 +65,7 @@ exports.getMe = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { businessName, name, panCardName, role } = req.body
+    const { businessName, name, panCardName, role, profileImage } = req.body
     
     // Check if business name is already taken by another user
     if (businessName) {
@@ -78,9 +78,15 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
+    const updateData = { businessName, name, panCardName, role, isProfileComplete: true }
+    if (profileImage) {
+      updateData.profileImage = profileImage
+      updateData.avatar = profileImage // Sync both for compatibility
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { businessName, name, panCardName, role, isProfileComplete: true },
+      updateData,
       { new: true, runValidators: true }
     )
     res.json({ success: true, user, token: signToken(user._id) })

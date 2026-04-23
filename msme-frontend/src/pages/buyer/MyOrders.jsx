@@ -32,8 +32,20 @@ export default function MyOrders() {
   }
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <div style={{ width: '40px', height: '40px', border: '4px solid #ddd', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+    <div style={{ background: '#f8f9fc', minHeight: '100vh' }}>
+      <BuyerNavbar />
+      <div style={{ maxWidth: '900px', margin: '32px auto', padding: '0 20px' }}>
+        {[1, 2].map(i => (
+          <div key={i} style={{ background: 'white', borderRadius: '20px', height: '240px', marginBottom: '20px', animation: 'pulse 1.5s infinite ease-in-out' }}></div>
+        ))}
+        <style>{`
+          @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+          }
+        `}</style>
+      </div>
     </div>
   )
 

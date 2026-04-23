@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, select: false },
   googleId: { type: String, index: true },
   avatar: { type: String },
+  profileImage: { type: String },
   role: { type: String, enum: ['seller', 'buyer', 'admin'], default: 'buyer' },
   
   // Seller specific fields

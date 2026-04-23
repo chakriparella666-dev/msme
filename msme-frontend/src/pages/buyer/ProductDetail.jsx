@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { FaStar, FaShoppingCart, FaBolt, FaArrowLeft, FaCheck, FaShieldAlt, FaTruck, FaUndo, FaShoppingBag, FaHeart, FaRegHeart } from 'react-icons/fa'
 import BuyerNavbar from '../../components/BuyerNavbar'
@@ -19,11 +19,12 @@ function Toast({ message, type }) {
 export default function ProductDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [product, setProduct] = useState(null)
+  const { state } = useLocation()
+  const [product, setProduct] = useState(state?.product || null)
   const [selectedImg, setSelectedImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
   const [quantity, setQuantity] = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!state?.product)
   const [addingToCart, setAddingToCart] = useState(false)
   const [added, setAdded] = useState(false)
   const [toast, setToast] = useState({ message: '', type: '' })
@@ -35,7 +36,10 @@ export default function ProductDetail() {
   }
 
   useEffect(() => { setAdded(false) }, [selectedSize, quantity])
-  useEffect(() => { fetchProduct() }, [id])
+  useEffect(() => { 
+    // Always fetch fresh data but don't set loading if we have state
+    fetchProduct() 
+  }, [id])
 
   const fetchProduct = async () => {
     try {
@@ -111,55 +115,52 @@ export default function ProductDetail() {
       <Toast message={toast.message} type={toast.type} />
 
       {/* Breadcrumb Nav */}
-      <div style={{ padding: '32px 40px 0', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.85rem' }}>
-        <button onClick={() => navigate('/buyer')} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 600, transition: 'var(--transition)' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text-main)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
-          <FaArrowLeft size={12} /> Store
+      <div style={{ padding: '20px 60px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+        <button onClick={() => navigate('/buyer')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <FaArrowLeft size={9} /> STORE
         </button>
-        <span style={{ color: '#CBD5E1' }}>/</span>
-        <span style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem', fontWeight: 700 }}>{product.category}</span>
-        <span style={{ color: '#CBD5E1' }}>/</span>
-        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{product.name}</span>
+        <span style={{ color: '#E2E8F0' }}>/</span>
+        <span style={{ color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>{product.category}</span>
+        <span style={{ color: '#E2E8F0' }}>/</span>
+        <span style={{ fontWeight: 800, color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.name}</span>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '24px auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '48px' }}>
+      <div style={{ maxWidth: '1200px', margin: '10px auto 40px', padding: '0 60px', display: 'grid', gridTemplateColumns: '380px 1fr', gap: '120px' }}>
         {/* Left: Image Gallery */}
-        <div>
-          <div style={{ position: 'relative', marginBottom: '16px', borderRadius: '12px', overflow: 'hidden', background: '#F8FAFC', height: '400px' }}>
-            <div 
-              onClick={toggleWishlist}
-              style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10, background: 'white', borderRadius: '50%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', cursor: 'pointer', transition: 'var(--transition)' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              {isWished ? <FaHeart color="#ef4444" size={20} /> : <FaRegHeart color="var(--text-main)" size={20} />}
-            </div>
-
-            {totalStock === 0 && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-                <span style={{ background: 'var(--text-main)', color: 'white', padding: '14px 32px', borderRadius: '4px', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '2px', textTransform: 'uppercase' }}>Sold Out</span>
-              </div>
-            )}
-            
+        <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', padding: '0', textAlign: 'center' }}>
             <img
               src={product.images[selectedImg] || 'https://via.placeholder.com/800?text=No+Image'}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', transition: 'transform 1s cubic-bezier(0.16, 1, 0.3, 1)' }}
+              style={{ width: '100%', height: 'auto', maxHeight: '480px', objectFit: 'contain', margin: '0 auto' }}
               alt={product.name}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              loading="eager"
               onError={e => { e.target.src = 'https://via.placeholder.com/800?text=Error' }}
             />
           </div>
+          
+          {/* Wishlist Floating Right Centered in Gap */}
+          <div 
+            onClick={toggleWishlist}
+            style={{ 
+              position: 'absolute', top: '20px', right: '-85px', zIndex: 10, 
+              background: 'white', borderRadius: '50%', width: '56px', height: '56px', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              boxShadow: '0 12px 30px rgba(0,0,0,0.1)', cursor: 'pointer' 
+            }}
+          >
+            {isWished ? <FaHeart color="#000" size={20} /> : <FaRegHeart color="#000" size={20} />}
+          </div>
 
           {product.images.length > 1 && (
-            <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '12px' }}>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '32px', overflowX: 'auto', paddingBottom: '12px' }}>
               {product.images.map((img, i) => (
                 <div 
                   key={i} 
                   onClick={() => setSelectedImg(i)}
                   style={{ 
-                    width: '80px', 
-                    height: '80px', 
-                    borderRadius: '8px', 
+                    width: '70px', 
+                    height: '70px', 
+                    borderRadius: '12px', 
                     overflow: 'hidden',
                     cursor: 'pointer',
                     border: `2px solid ${i === selectedImg ? 'var(--text-main)' : 'transparent'}`,
@@ -167,7 +168,11 @@ export default function ProductDetail() {
                     flexShrink: 0
                   }}
                 >
-                  <img src={img} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.src = 'https://via.placeholder.com/100' }} />
+                  <img 
+                    src={img} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    loading="lazy" 
+                  />
                 </div>
               ))}
             </div>
@@ -175,82 +180,82 @@ export default function ProductDetail() {
         </div>
 
         {/* Right: Product Info */}
-        <div style={{ paddingTop: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>{product.category}</span>
-            <span style={{ color: '#CBD5E1' }}>•</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <FaStar color="#FFB800" size={12} />
-              <span style={{ fontWeight: 700, fontSize: '0.8rem' }}>{product.rating || '4.5'}</span>
-            </div>
+        <div style={{ padding: '0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+             <span style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{product.category}</span>
+             <div style={{ background: '#FFF7ED', color: '#C2410C', padding: '3px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: 800 }}>
+                <FaStar color="#F59E0B" size={10} /> 4.5
+             </div>
           </div>
 
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: "'Sora', sans-serif", letterSpacing: '-0.8px', lineHeight: 1.2, marginBottom: '8px', color: 'var(--text-main)' }}>{product.name}</h1>
-          
-          <div style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '32px', fontWeight: 500 }}>
-            by <strong style={{ color: 'var(--text-main)', fontWeight: 700 }}>{product.seller?.businessName || 'MSME Direct'}</strong>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 800, letterSpacing: '-0.5px', marginBottom: '2px', color: 'var(--text-main)', textTransform: 'lowercase' }}>{product.name}</h1>
+          <div style={{ color: '#94A3B8', fontSize: '0.85rem', marginBottom: '20px', fontWeight: 600 }}>
+            Sold by <strong style={{ color: 'var(--text-main)', fontWeight: 800 }}>{product.seller?.businessName || 'brk'}</strong>
           </div>
 
-          <div style={{ marginBottom: '32px' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'baseline', gap: '8px', fontFamily: "'Sora', sans-serif" }}>
-              ₹{product.price.toLocaleString()}
-              <span style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Inc. of all taxes</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+            <span style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--text-main)' }}>₹{product.price.toLocaleString()}</span>
+            <div style={{ background: '#F0FDF4', color: '#166534', padding: '6px 14px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Free Delivery</div>
           </div>
 
           {/* Size Selector */}
-          <div style={{ marginBottom: '40px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Select Size</span>
-              <button style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}>Size Guide</button>
+              <span style={{ fontWeight: 800, fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Select Size</span>
+              <button style={{ background: 'none', border: 'none', color: '#94A3B8', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', textTransform: 'uppercase' }}>Size Guide</button>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px' }}>
-              {product.sizes.map(s => (
-                <button
-                  key={s.size}
-                  onClick={() => s.stock > 0 && setSelectedSize(s.size)}
-                  disabled={s.stock === 0}
-                  style={{
-                    height: '44px',
-                    borderRadius: '6px',
-                    border: '1.2px solid',
-                    borderColor: selectedSize === s.size ? 'var(--text-main)' : s.stock === 0 ? '#F1F5F9' : '#E2E8F0',
-                    background: selectedSize === s.size ? 'var(--text-main)' : 'white',
-                    color: selectedSize === s.size ? 'white' : s.stock === 0 ? '#CBD5E1' : 'var(--text-main)',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    cursor: s.stock === 0 ? 'not-allowed' : 'pointer',
-                    transition: 'var(--transition)'
-                  }}
-                >
-                  {s.size}
-                  {s.stock > 0 && s.stock <= 3 && (
-                    <div style={{ position: 'absolute', bottom: '-20px', left: 0, right: 0, fontSize: '10px', color: '#ef4444' }}>Low stock</div>
-                  )}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {product.sizes.map(s => {
+                const isOutOfStock = s.stock === 0;
+                return (
+                  <button
+                    key={s.size}
+                    onClick={() => !isOutOfStock && setSelectedSize(s.size)}
+                    disabled={isOutOfStock}
+                    style={{
+                      minWidth: '68px',
+                      height: '48px',
+                      borderRadius: '12px',
+                      border: '2px solid',
+                      borderColor: selectedSize === s.size ? '#000' : isOutOfStock ? '#F8FAFC' : '#F1F5F9',
+                      background: selectedSize === s.size ? '#000' : 'white',
+                      color: selectedSize === s.size ? 'white' : isOutOfStock ? '#CBD5E1' : '#000',
+                      fontSize: '0.95rem',
+                      fontWeight: 800,
+                      cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {s.size}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '16px' }}>
+          {/* Quantity and Action Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 0.8fr', gap: '12px' }}>
               <button 
                 onClick={handleAddToCart} 
                 disabled={addingToCart || totalStock === 0} 
-                className="btn-primary"
-                style={{ padding: '20px', borderRadius: '12px', fontSize: '1rem', width: '100%', background: 'var(--text-main)' }}
+                style={{ 
+                  height: '52px', borderRadius: '12px', fontSize: '0.95rem', 
+                  fontWeight: 800, background: 'white', border: '1.5px solid #F1F5F9',
+                  color: '#000', cursor: 'pointer', transition: 'all 0.2s ease',
+                  textTransform: 'uppercase'
+                }}
               >
                 {addingToCart ? 'Adding...' : 'Add to Bag'}
               </button>
               
-              <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ flex: 1, height: '100%', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>−</button>
-                <span style={{ width: '40px', textAlign: 'center', fontWeight: 700 }}>{quantity}</span>
+              <div style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', borderRadius: '12px', overflow: 'hidden', height: '52px' }}>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ flex: 1, height: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#94A3B8' }}>−</button>
+                <span style={{ width: '32px', textAlign: 'center', fontWeight: 800, fontSize: '1rem' }}>{quantity}</span>
                 <button 
-                  onClick={() => setQuantity(Math.min(selectedSizeStock || 1, quantity + 1))}
-                  style={{ flex: 1, height: '100%', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                  onClick={() => setQuantity(Math.min(selectedSizeStock || 99, quantity + 1))}
+                  style={{ flex: 1, height: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem', color: '#000' }}
                 >+</button>
               </div>
             </div>
@@ -258,34 +263,15 @@ export default function ProductDetail() {
             <button 
               onClick={handleBuyNow} 
               disabled={totalStock === 0} 
-              className="btn-outline"
-              style={{ padding: '20px', borderRadius: '12px', fontSize: '1rem', width: '100%' }}
+              style={{ 
+                height: '56px', borderRadius: '12px', fontSize: '1.1rem', 
+                width: '100%', background: '#000', color: 'white', 
+                border: 'none', fontWeight: 800, cursor: 'pointer',
+                textTransform: 'uppercase', letterSpacing: '1px'
+              }}
             >
-              Checkout Now
+              Purchase Now
             </button>
-          </div>
-
-          {/* Value Props */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', padding: '32px 0', borderTop: '1px solid var(--border-soft)', marginBottom: '40px' }}>
-            {[
-              { icon: <FaShieldAlt size={20} />, title: 'Genuine', sub: 'Verified' },
-              { icon: <FaTruck size={20} />, title: 'Express', sub: 'Next Day' },
-              { icon: <FaUndo size={20} />, title: 'Returns', sub: '7-Day' },
-            ].map((b, i) => (
-              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <div style={{ color: 'var(--text-muted)' }}>{b.icon}</div>
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{b.title}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{b.sub}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Description */}
-          <div style={{ borderTop: '1px solid var(--border-soft)', paddingTop: '32px' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Details</h3>
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.8, fontSize: '1rem' }}>{product.description}</p>
           </div>
         </div>
       </div>

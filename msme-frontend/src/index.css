@@ -235,16 +235,17 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Buyer Professional UI */
 .buyer-nav {
-  background: linear-gradient(135deg, #1A237E, #3D5AFE);
+  background: #0F172A; /* Using premium dark navy */
   color: white;
-  padding: 12px 24px;
+  padding: 16px 40px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  min-height: 88px;
 }
 
 .buyer-subnav {
@@ -387,4 +388,16 @@ h1, h2, h3, h4, h5, h6 {
   background: #f3f3f3;
 }
 
+.nav-search-input::placeholder {
+  color: #94A3B8 !important;
+  opacity: 1 !important;
+}
 
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
