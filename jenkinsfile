@@ -7,53 +7,57 @@ pipeline {
         GOOGLE_CLIENT_ID = credentials('GOOGLE_CLIENT_ID')
         GOOGLE_CLIENT_SECRET = credentials('GOOGLE_CLIENT_SECRET')
         BACKEND_URL = "http://localhost:5000"
-        FRONTEND_URL = "http://localhost:3001"
+        FRONTEND_URL = "http://localhost:5173"
+        VITE_API_URL = "http://localhost:5000/api"
+
     }
 
     stages {
-
-        stage('Checkout Code') {
+        stage('Prepare Environment') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/chakriparella666-dev/MSMEplatform.git'
+                echo 'Cleaning workspace and checking out code...'
+                // If using Pipeline from SCM, checkout is automatic. 
+                // Manual checkout if needed:
+                // git branch: 'main', url: 'https://github.com/chakriparella666-dev/MSMEplatform.git'
             }
         }
 
-        stage('Create .env file') {
+        stage('Create Config') {
             steps {
-                writeFile file: '.env', text: """
-MONGO_URL=${MONGO_URL}
-JWT_SECRET=${JWT_SECRET}
-GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-BACKEND_URL=${BACKEND_URL}
-FRONTEND_URL=${FRONTEND_URL}
-"""
+                echo 'Generating .env file...'
+                bat """
+                echo MONGO_URL=%MONGO_URL% > .env
+                echo JWT_SECRET=%JWT_SECRET% >> .env
+                echo GOOGLE_CLIENT_ID=%GOOGLE_CLIENT_ID% >> .env
+                echo GOOGLE_CLIENT_SECRET=%GOOGLE_CLIENT_SECRET% >> .env
+                echo BACKEND_URL=%BACKEND_URL% >> .env
+                echo FRONTEND_URL=%FRONTEND_URL% >> .env
+                echo VITE_API_URL=%VITE_API_URL% >> .env
+                """
             }
         }
 
-        stage('Stop Old Containers') {
+        stage('Docker Cleanup') {
             steps {
-                bat 'docker compose down'
+                echo 'Stopping existing containers...'
+                bat 'docker compose down --remove-orphans || true'
             }
         }
 
-        stage('Build Images') {
+        stage('Build & Deploy') {
             steps {
-                bat 'docker compose build'
-            }
-        }
-
-        stage('Deploy Containers') {
-            steps {
+                echo 'Building and starting services...'
+                bat 'docker compose build --no-cache'
                 bat 'docker compose up -d'
             }
         }
 
-        stage('Verify Running') {
+        stage('Health Check') {
             steps {
+                echo 'Verifying deployment...'
                 bat 'docker ps'
+                bat 'docker compose logs --tail=20'
             }
         }
     }
-}
+}
